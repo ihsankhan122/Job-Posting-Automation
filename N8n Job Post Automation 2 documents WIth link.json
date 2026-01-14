@@ -1,0 +1,339 @@
+{
+  "name": "N8n Job Post Automation 2 documents WIth link",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e2c24847-6bfb-40dd-aafe-79032d72e268",
+              "name": "sender",
+              "value": "={{ $('Code in JavaScript1').item.json.from.value[0].address }}",
+              "type": "string"
+            },
+            {
+              "id": "2acf8130-cb3e-4536-b142-2d6364addd34",
+              "name": "body",
+              "value": "={{ $json.TextResult }}",
+              "type": "string"
+            },
+            {
+              "id": "8881422a-f69c-4cc6-b9cf-2d5fb7bb5e9e",
+              "name": "reciever",
+              "value": "={{ $('Code in JavaScript1').item.json.headers['delivered-to'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1152,
+        -96
+      ],
+      "id": "2eb1a559-4157-442c-8705-cdc86c8d8f55",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.nwgh.pk/wp-json/wp/v2/jobs",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"title\": {{ JSON.stringify($json.title || \"\") }},\n  \"content\": {{ JSON.stringify($json.content || \"\") }},\n  \"status\": {{ JSON.stringify($json.status || \"publish\") }},\n  \"meta\": {\n    \"application-email\": {{ JSON.stringify($json[\"application-email\"] || \"N/A\") }},\n    {{ $json[\"date-close\"] ? `\"date-close\": ${$json[\"date-close\"]},` : \"\" }}\n    \"location\": {{ JSON.stringify($json.location || \"N/A\") }},\n    \"type-full-time-part-time-contract\": {{ JSON.stringify($json[\"type-full-time-part-time-contract\"] || \"N/A\") }},\n    \"job-qualification\": {{ JSON.stringify($json[\"job-qualification\"] || \"N/A\") }},\n    \"eligibility\": {{ JSON.stringify($json.eligibility || \"N/A\") }},\n    \"terms\": {{ JSON.stringify($json.terms || \"N/A\") }}\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2208,
+        -96
+      ],
+      "id": "49bdc76e-49b5-4efc-9f90-fa3f98a2a70b",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TkchrBSMd747G4XZ",
+          "name": "Header Auth account"
+        },
+        "httpBasicAuth": {
+          "id": "CkWy750Sd0HD57gv",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "24b5c962-8fe9-47d3-a09e-539e34f35252",
+              "leftValue": "={{ $json.isValid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1760,
+        -80
+      ],
+      "id": "05f3dfde-9bf6-44f8-bc19-9e469f05175f",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "fromEmail": "hammad.ahmed@blimp.pk",
+        "toEmail": "=ihsanmehmood384@gmail.com",
+        "subject": "Job Posted Successfuly",
+        "html": "=<p>Assalam-o-Alaikum,</p>\n<p>Your following job post has been published successfully:</p>\n<ul>\n  <li><strong>{{ $json.title.rendered }}</strong></li>\n</ul>\n<p>You can view the live job post here: <a href=\"{{ $json.link }}\">{{ $json.link }}</a></p>\n<br>\n<p>---</p>\n<p><i>This email was sent automatically with n8n</i></p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2320,
+        272
+      ],
+      "id": "fadb79e8-23c0-41ac-b707-538c110c6ead",
+      "name": "Send email successfully",
+      "webhookId": "69ad8322-36ee-4b61-b619-156e133c10d7",
+      "credentials": {
+        "smtp": {
+          "id": "MPjPUBQs1HvLxD6G",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let results = [];\n\n// ================================\n// Helper Functions\n// ================================\nconst cleanText = (text) =>\n    text.replace(/\\r/g, \"\").replace(/\\n{2,}/g, \"\\n\").trim();\n\nconst cleanJobQualification = (text = \"\") => {\n    return text.replace(/Job Description:\\s*[\\s\\S]*$/i, \"\").trim();\n};\n\n// ================================\n// Extract Functions\n// ================================\nconst extractTitle = (text) => {\n    const match = text.match(/Job Title:\\s*([^\\n]+)/i);\n    if (match) return match[1].trim();\n    return text.split(\"\\n\")[0].trim();\n};\n\nconst extractDescription = (text) => {\n    const match = text.match(/Job Description:\\s*([\\s\\S]*)/i);\n    if (match) return cleanText(match[1]);\n    const stop = text.match(/TERMS\\s*&\\s*CONDITIONS/i);\n    if (stop) return cleanText(text.substring(0, stop.index));\n    return cleanText(text);\n};\n\nconst extractTermsMeta = (text) => {\n    const match = text.match(/TERMS\\s*&\\s*CONDITIONS:?\\s*([\\s\\S]*?)$/i);\n    return match ? cleanText(match[1]) : \"N/A\";\n};\n\nconst extractEmail = (text) => {\n    if (!text) return \"N/A\";\n    const normalized = text.replace(/\\u00A0/g, \" \").replace(/\\s+/g, \" \");\n    let match = normalized.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-z]{2,}/i);\n    return match ? match[0].trim() : \"N/A\";\n};\n\nconst extractDate = (text) => {\n    const match = text.match(\n        /(Closing Date:|latest by)\\s*([A-Za-z]{3,9}\\s+\\d{1,2}(st|nd|rd|th)?,?\\s+\\d{4}|\\d{4}-\\d{2}-\\d{2})/i\n    );\n    if (!match) return null;\n    const cleanDate = match[2].replace(/(st|nd|rd|th)/gi, \"\");\n    const d = new Date(cleanDate);\n    return isNaN(d.getTime()) ? null : Math.floor(d.getTime() / 1000);\n};\n\nconst extractEligibility = (text, terms) => {\n    let match = text.match(\n        /Eligibility:\\s*([\\s\\S]*?)(?:\\n\\n|TERMS|Job Type|Job Description|$)/i\n    );\n    if (match) return match[1].trim();\n\n    const termIndex = text.search(/TERMS\\s*&\\s*CONDITIONS/i);\n    if (termIndex !== -1) {\n        const beforeTerms = text.substring(0, termIndex);\n        let bulletMatch = beforeTerms.match(/•\\s*(.+)/g);\n        if (bulletMatch)\n            return bulletMatch\n                .map(b => b.replace(/^•\\s*/, \"\").trim())\n                .join(\"\\n\");\n    }\n\n    if (/Candidates should/i.test(terms)) return \"See Terms & Conditions\";\n    return \"N/A\";\n};\n\nconst extractJobType = (text, terms) => {\n    const match = text.match(/Job Type:\\s*([^\\n]+)/i);\n    if (match) return match[1].trim();\n    if (/full\\s*time/i.test(text + \" \" + terms)) return \"Full Time\";\n    if (/part\\s*time/i.test(text + \" \" + terms)) return \"Part Time\";\n    if (/contract/i.test(text + \" \" + terms)) return \"Contract\";\n    return \"N/A\";\n};\n\nconst extractLocation = (text) => {\n    const match = text.match(/Peshawar|Karachi|Lahore|Islamabad/i);\n    return match ? match[0] : \"N/A\";\n};\n\n// ================================\n// MAIN PROCESS\n// ================================\nfor (const item of $items()) {\n    const body = item.json.TextResult || item.json.Body || \"\";\n    if (!body.trim()) continue;\n\n    const jobBlocks = body.split('---JOB---').filter(j => j.trim());\n    if (!jobBlocks.length) jobBlocks.push(body);\n\n    let attachments = [];\n    if (item.binary) {\n        for (const key of Object.keys(item.binary)) {\n            attachments.push({\n                binary: key,\n                filename: item.binary[key].fileName\n            });\n        }\n    }\n\n    for (const job of jobBlocks) {\n        const jobText = cleanText(job);\n\n        const title = extractTitle(jobText) || \"Unknown Job\";\n        const content = extractDescription(jobText);\n        const terms = extractTermsMeta(jobText);\n        const eligibility = extractEligibility(jobText, terms);\n        const jobType = extractJobType(jobText, terms);\n\n        const jobQualificationRaw = `${eligibility}\\n\\n${terms}`.trim();\n        const jobQualificationClean = cleanJobQualification(jobQualificationRaw);\n\n        const missingFields = [];\n        if (!eligibility || eligibility === \"N/A\") missingFields.push(\"Eligibility\");\n        if (!jobType || jobType === \"N/A\") missingFields.push(\"Job Type\");\n\n        const attachmentListHtml = attachments.length\n            ? `<p>Attached files:</p><ul>${attachments\n                  .map(f => `<li>${f.filename}</li>`)\n                  .join(\"\")}</ul>`\n            : \"\";\n\n        const emailHtml = `\n            <p>Assalam-o-Alaikum,</p>\n            <p>\n                Your job post <strong>${title}</strong>\n                ${\n                    missingFields.length === 0\n                        ? \"has been published successfully.\"\n                        : \"could not be published because some required information is missing:\"\n                }\n            </p>\n            ${\n                missingFields.length\n                    ? `<ul><li>${missingFields.join(\"</li><li>\")}</li></ul>`\n                    : \"\"\n            }\n            ${attachmentListHtml}\n            <p>This email was sent automatically with n8n.</p>\n        `;\n\n        results.push({\n            json: {\n                isValid: missingFields.length === 0,\n                title,\n                documentName: title,\n                content,\n                status: \"publish\", // Hardcoded to publish for all items\n                \"application-email\": extractEmail(jobText),\n                \"date-close\": extractDate(jobText),\n                location: extractLocation(jobText),\n                \"type-full-time-part-time-contract\": jobType,\n                \"job-qualification\": jobQualificationClean,\n                terms,\n                eligibility,\n                missingFieldsHtml: missingFields.length\n                    ? `<ul><li>${missingFields.join(\"</li><li>\")}</li></ul>`\n                    : \"\",\n                emailHtml\n            },\n            binary: attachments.reduce((acc, file) => {\n                acc[file.binary] = item.binary[file.binary];\n                return acc;\n            }, {})\n        });\n    }\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        -96
+      ],
+      "id": "c6db6fba-0825-4b30-8db6-56f2b87f27e4",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "format": "resolved",
+        "dataPropertyAttachmentsPrefixName": "attachment",
+        "options": {
+          "trackLastMessageId": false
+        }
+      },
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2.1,
+      "position": [
+        16,
+        -96
+      ],
+      "id": "b1e648bc-4f01-48fd-8859-00c24e639558",
+      "name": "Email Trigger (IMAP)",
+      "credentials": {
+        "imap": {
+          "id": "st2Vtnd1CxpTzKyq",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\n\nfor (const item of $input.all()) {\n  if (!item.binary) continue;\n\n  for (const key of Object.keys(item.binary)) {\n    if (key.startsWith('attachment')) {\n      results.push({\n        json: item.json,\n        binary: {\n          attachment: item.binary[key], // normalize name\n        },\n      });\n    }\n  }\n}\n\nreturn results;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        -96
+      ],
+      "id": "5e10eed9-5ea9-4452-8693-e4aa0ce8c4a7",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "fromEmail": "hammad.ahmed@blimp.pk",
+        "toEmail": "=ihsanmehmood384@gmail.com",
+        "subject": "Job Post Error: Missing Information.",
+        "html": "=<p>Assalam-o-Alaikum,</p>\n<p>Your job post <strong>{{ $json.documentName }}</strong> could not be published because some required information is missing:</p>\n{{ $json.missingFieldsHtml }}\n<p>Kindly review the details, correct the missing information, and resend the email.</p>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1712,
+        224
+      ],
+      "id": "b34480e4-6102-47d2-adc8-5f597b8baabe",
+      "name": "Send notication when false1",
+      "webhookId": "bc12e13c-a905-47e7-b791-4746a271e289",
+      "credentials": {
+        "smtp": {
+          "id": "MPjPUBQs1HvLxD6G",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloudmersive.com/convert/docx/to/txt",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "attachment",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        784,
+        -96
+      ],
+      "id": "7e9bec11-c770-4568-96a1-b886324af8f8",
+      "name": "HTTP Request",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TkchrBSMd747G4XZ",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Send email successfully",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send notication when false1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email successfully": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5b7f9e79-a6db-4505-8eae-725d049d9658",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f1559eaa2403ae0402e5d29db5d6876f8f7c41001326479197fe40159c5a11c"
+  },
+  "id": "l3C9oY6COclUVrni",
+  "tags": []
+}
