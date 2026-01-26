@@ -1,0 +1,369 @@
+{
+  "name": "Job Post Automation wordpress Copy With elegibility copy Working current claude complete working",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e2c24847-6bfb-40dd-aafe-79032d72e268",
+              "name": "sender",
+              "value": "={{ $('attachment reader').item.json.from.value[0].address }}",
+              "type": "string"
+            },
+            {
+              "id": "2acf8130-cb3e-4536-b142-2d6364addd34",
+              "name": "body",
+              "value": "=={{ $json.html_body }}.",
+              "type": "string"
+            },
+            {
+              "id": "8881422a-f69c-4cc6-b9cf-2d5fb7bb5e9e",
+              "name": "receiver",
+              "value": "={{ $('attachment reader').item.json.headers['delivered-to'] }}",
+              "type": "string"
+            },
+            {
+              "id": "2c6f2dce-a447-4348-889e-4ef559f21f5a",
+              "name": "originalFileName",
+              "value": "={{ $('attachment reader').item.json.originalFileName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        -96
+      ],
+      "id": "0f6656bd-8b06-436a-b043-5bdde5d85f13",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "24b5c962-8fe9-47d3-a09e-539e34f35252",
+              "leftValue": "={{ $json.isValid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1968,
+        -80
+      ],
+      "id": "6b27b639-6146-4e12-91d0-2fd01f2dfba7",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "fromEmail": "=hammad.ahmed@blimp.pk",
+        "toEmail": "=ihsanmehmood384@gmail.com",
+        "subject": "Job Posted Successfuly",
+        "html": "=<p>Assalam-o-Alaikum,</p>\n<p>Your following job post has been published successfully:</p>\n<ul>\n  <li><strong>{{ $json.title.rendered }}</strong></li>\n</ul>\n<p>You can view the live job post here: <a href=\"{{ $json.link }}\">{{ $json.link }}</a></p>\n<br>\n<p>---</p>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2528,
+        272
+      ],
+      "id": "72535c41-5875-4e06-9b49-c343ff1384a3",
+      "name": "Send email successfully",
+      "webhookId": "109834d2-7d2b-4f5a-8285-13547afd91a7",
+      "credentials": {
+        "smtp": {
+          "id": "MPjPUBQs1HvLxD6G",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ========================================\n// MERGED DYNAMIC HTML PARSER\n// Combines: Your hash & formatting + My flexibility\n// ========================================\n\nlet results = [];\nlet processedKeys = new Set();\n\n// ========================================\n// HASH GENERATION (Your Code)\n// ========================================\nfunction generateHash(string) {\n  let hash = 0;\n  for (let i = 0; i < string.length; i++) {\n    const char = string.charCodeAt(i);\n    hash = ((hash << 5) - hash) + char;\n    hash |= 0;\n  }\n  return Math.abs(hash).toString();\n}\n\n// ========================================\n// SMART DATE EXTRACTION (Merged)\n// ========================================\nfunction extractDate(text) {\n  // Your powerful regex pattern\n  const dateRegex = /(\\d{1,2})?\\s*(?:st|nd|rd|th)?\\s*([a-z]{3,9})\\s*(?:st|nd|rd|th)?\\s*,?\\s*(\\d{1,2})?\\s*(?:st|nd|rd|th)?\\s*,?\\s*(202\\d)/i;\n  const dateMatch = text.match(dateRegex);\n  \n  if (dateMatch) {\n    try {\n      const monthStr = dateMatch[2];\n      const yearStr = dateMatch[4];\n      const dayStr = dateMatch[1] || dateMatch[3] || \"01\";\n      const parsedDate = new Date(`${monthStr} ${dayStr}, ${yearStr}`);\n      \n      if (!isNaN(parsedDate.getTime())) {\n        parsedDate.setHours(23, 59, 59);\n        const timestamp = Math.floor(parsedDate.getTime() / 1000);\n        console.log(`📅 Found closing date: ${parsedDate.toDateString()}`);\n        return timestamp;\n      }\n    } catch (e) {\n      console.log(`⚠️ Date parsing error: ${e.message}`);\n    }\n  }\n  \n  // My fallback: Dynamic 30 days from now\n  console.log(`⚠️ No valid date found, using 30-day default`);\n  const defaultDate = new Date();\n  defaultDate.setDate(defaultDate.getDate() + 30);\n  defaultDate.setHours(23, 59, 59);\n  return Math.floor(defaultDate.getTime() / 1000);\n}\n\n// ========================================\n// DYNAMIC COLUMN DETECTION (My Code)\n// ========================================\nfunction findColumns(headerCells) {\n  let serialCol = -1;\n  let designationCol = -1;\n  let eligibilityCol = -1;\n  \n  headerCells.forEach((cell, index) => {\n    const lower = cell.toLowerCase().trim();\n    if (lower.includes('s#') || lower.includes('serial') || lower === 'no') {\n      serialCol = index;\n    }\n    if (lower.includes('designation') || lower.includes('post')) {\n      designationCol = index;\n    }\n    if (lower.includes('eligibility') || lower.includes('qualification')) {\n      eligibilityCol = index;\n    }\n  });\n  \n  // Defaults if not found\n  if (designationCol === -1) designationCol = 1;\n  if (eligibilityCol === -1) eligibilityCol = 2;\n  \n  return { serialCol, designationCol, eligibilityCol };\n}\n\n// ========================================\n// EXTRACT CELLS FROM TABLE ROW (My Code)\n// ========================================\nfunction extractCells(rowHtml) {\n  const cellRegex = /<t[dh][^>]*>([\\s\\S]*?)<\\/t[dh]>/gi;\n  const cells = [...rowHtml.matchAll(cellRegex)];\n  \n  return cells.map(cell => {\n    let text = cell[1]\n      .replace(/<br\\s*\\/?>/gi, '\\n')\n      .replace(/<\\/p>/gi, '\\n')\n      .replace(/<li[^>]*>/gi, '\\n• ')\n      .replace(/<\\/li>/gi, '')\n      .replace(/<ul[^>]*>/gi, '')\n      .replace(/<\\/ul>/gi, '')\n      .replace(/<[^>]*>/g, ' ')\n      .replace(/&nbsp;/g, ' ')\n      .replace(/&amp;/g, '&')\n      .replace(/&lt;/g, '<')\n      .replace(/&gt;/g, '>')\n      .replace(/&quot;/g, '\"')\n      .replace(/&#39;/g, \"'\")\n      .replace(/\\r/g, '')\n      .replace(/\\t+/g, ' ')\n      .replace(/ +/g, ' ');\n    \n    return text.trim();\n  });\n}\n\n// ========================================\n// ENHANCED CONTENT FORMATTING (Your Code + My Keywords)\n// ========================================\nfunction formatContent(text, isEligibility = false) {\n  if (!text || text === \"N/A\" || text.length < 10) return \"N/A\";\n  \n  const footerKeywords = /(AHL is an equal opportunity|CAREER OPPORTUNITY|HR Department|Northwest General Hospital)/i;\n  const splitIndex = text.search(footerKeywords);\n  \n  let mainRules = text;\n  let footerText = \"\";\n\n  if (splitIndex !== -1) {\n    mainRules = text.substring(0, splitIndex).trim();\n    footerText = text.substring(splitIndex).trim();\n  }\n\n  // Better line splitting - preserve complete sentences\n  let rawLines;\n  \n  if (isEligibility) {\n    // For eligibility: split more carefully\n    rawLines = mainRules\n      .split(/\\n/)\n      .map(line => line.trim())\n      .filter(line => line.length > 0);\n    \n    // Merge incomplete lines\n    const mergedLines = [];\n    let currentLine = \"\";\n    \n    for (let line of rawLines) {\n      // Remove bullet symbols\n      line = line.replace(/^[•●○■◆▪▫⦿⦾\\-]+\\s*/g, '').trim();\n      \n      // If line seems incomplete (no ending punctuation and short), merge with next\n      if (currentLine && line.length > 0) {\n        currentLine += \" \" + line;\n      } else if (line.length > 0) {\n        currentLine = line;\n      }\n      \n      // If we have a complete sentence or a long enough line, save it\n      if (currentLine.match(/[.!?]$/) || currentLine.length > 80) {\n        mergedLines.push(currentLine);\n        currentLine = \"\";\n      }\n    }\n    \n    // Don't forget the last line\n    if (currentLine.length > 0) {\n      mergedLines.push(currentLine);\n    }\n    \n    rawLines = mergedLines;\n  } else {\n    // For terms: split by periods or bullets\n    rawLines = mainRules.split(/[•.\\n](?=\\s|[A-Z])/).filter(l => l.trim().length > 5);\n  }\n  \n  // Enhanced keyword filtering for eligibility\n  const eligibilityKeywords = /candidate|experience|qualification|degree|master|bachelor|university|HEC|skills|proficient|relevant|preferred|years|hospital|minimum|required|strong|proven|demonstrated|valid|license|BBA|MBA|MBBS|MD|Pharm|diploma|BS|MS|MPhil|PhD|JCI|ISO|inventory|management|forecasting|procurement|stock|automation|efficiency|cost|control|certified|registration|council|ability|knowledge|understanding|familiar|expertise|competent|fluent|excellent|good|working|training|certification|accredited|recognized|graduate|post-graduate|intermediate|matric|HSSC|SSC|technical|professional|age limit|nationality|domicile|command|liaison|coordination|verbal|written|office|communication/i;\n  \n  let filteredLines = rawLines;\n  \n  // Apply keyword filter only for eligibility\n  if (isEligibility) {\n    filteredLines = rawLines.filter(line => {\n      const cleanLine = line.trim();\n      return cleanLine.length > 15 && eligibilityKeywords.test(cleanLine);\n    });\n  }\n  \n  // Your numbering format - ensure proper punctuation\n  let formattedMain = filteredLines\n    .map((line, index) => {\n      let cleanLine = line.trim();\n      // Add period if missing\n      if (!cleanLine.match(/[.!?]$/)) {\n        cleanLine += '.';\n      }\n      return `${index + 1}. ${cleanLine}`;\n    })\n    .join('<br>');\n\n  // Your footer formatting (Bold + Line breaks)\n  if (footerText) {\n    let formattedFooter = footerText\n      .replace(/AHL is an equal opportunity/g, 'AHL is an equal opportunity')\n      .replace(/CAREER OPPORTUNITY/g, '<br><br>CAREER OPPORTUNITY')\n      .replace(/HR Department/g, '<br>HR Department')\n      .replace(/Northwest General Hospital/g, '<br>Northwest General Hospital')\n      .replace(/Sector A3/g, '<br>Sector A3')\n      .replace(/Ph:/g, '<br>Ph:');\n\n    return `${formattedMain}<br><br><strong>${formattedFooter}</strong>`;\n  }\n\n  return formattedMain;\n}\n\n// ========================================\n// HELPER FUNCTIONS\n// ========================================\nfunction isHeader(text) {\n  const lower = text.toLowerCase().trim();\n  return /^(s#|serial|sr|no|designation|eligibility|qualification|position|post)$/i.test(lower) ||\n         text.length < 3 ||\n         /^\\d+$/.test(text);\n}\n\n// ========================================\n// MAIN PROCESSING\n// ========================================\nconst items = $input.all();\n\nconsole.log(`📥 Processing ${items.length} items`);\n\nfor (const item of items) {\n  const html = item.json.data || item.json.body || \"\";\n  const sender = item.json.sender || \"Unknown\";\n  const fileName = item.json.originalFileName || \"\";\n  \n  if (!html || html.length < 100) {\n    console.log(`⏭️  Skipping: No HTML content`);\n    continue;\n  }\n\n  console.log(`\\n📄 File: ${fileName}`);\n  console.log(`📊 HTML: ${html.length} chars`);\n\n  // ========================================\n  // 1. EXTRACT TERMS & CONDITIONS\n  // ========================================\n  let termsSection = \"N/A\";\n  const termsRegex = /TERMS[\\s\\S]*?CONDITIONS[:\\s]*([\\s\\S]*?)(?:<\\/div>|<\\/body>|$)/i;\n  const termsMatch = html.match(termsRegex);\n  \n  if (termsMatch && termsMatch[1]) {\n    termsSection = termsMatch[1]\n      .replace(/<p[^>]*>/gi, '\\n')\n      .replace(/<li[^>]*>/gi, '\\n')\n      .replace(/<br\\s*\\/?>/gi, '\\n')\n      .replace(/<[^>]*>/g, ' ')\n      .replace(/&nbsp;/g, ' ')\n      .replace(/&amp;/g, '&')\n      .replace(/\\s+/g, ' ')\n      .trim();\n    \n    console.log(`📜 Terms found: ${termsSection.length} chars`);\n  }\n\n  // ========================================\n  // 2. EXTRACT CLOSING DATE\n  // ========================================\n  const textBody = html\n    .replace(/<br\\s*\\/?>/gi, '\\n')\n    .replace(/<\\/p>/gi, '\\n')\n    .replace(/<[^>]*>/g, ' ')\n    .replace(/&nbsp;/g, ' ')\n    .replace(/\\s+/g, ' ');\n  \n  const closingTimestamp = extractDate(termsSection + \" \" + textBody);\n\n  // ========================================\n  // 3. PARSE TABLE WITH DYNAMIC COLUMNS\n  // ========================================\n  const tableRegex = /<table[^>]*>([\\s\\S]*?)<\\/table>/gi;\n  const tables = [...html.matchAll(tableRegex)];\n  \n  console.log(`📊 Found ${tables.length} tables`);\n  \n  for (let tableIndex = 0; tableIndex < tables.length; tableIndex++) {\n    const tableHtml = tables[tableIndex][1];\n    const rowRegex = /<tr[^>]*>([\\s\\S]*?)<\\/tr>/gi;\n    const rows = [...tableHtml.matchAll(rowRegex)];\n    \n    console.log(`  Table ${tableIndex + 1}: ${rows.length} rows`);\n    \n    if (rows.length < 2) continue;\n    \n    // Parse header to find columns dynamically\n    const headerCells = extractCells(rows[0][1]);\n    const columns = findColumns(headerCells);\n    \n    console.log(`  Columns: Designation=${columns.designationCol}, Eligibility=${columns.eligibilityCol}`);\n    \n    // Process data rows\n    for (let i = 1; i < rows.length; i++) {\n      const cells = extractCells(rows[i][1]);\n      \n      if (cells.length < 2) continue;\n      \n      const jobTitle = (cells[columns.designationCol] || cells[1] || \"\")\n        .trim()\n        .replace(/\\s+/g, ' ');\n      \n      const rawEligibility = (cells[columns.eligibilityCol] || cells[2] || cells[cells.length - 1] || \"\").trim();\n      \n      // Validate\n      if (jobTitle.length < 3 || isHeader(jobTitle)) {\n        console.log(`  Row ${i}: Skipped (header or invalid)`);\n        continue;\n      }\n      \n      // Check for duplicates using hash\n      const externalId = generateHash(jobTitle + fileName);\n      const dupKey = jobTitle + sender + fileName;\n      \n      if (processedKeys.has(dupKey)) {\n        console.log(`  ⏭️  Skip duplicate: ${jobTitle}`);\n        continue;\n      }\n      processedKeys.add(dupKey);\n      \n      // Format eligibility and terms\n      const bulletEligibility = formatContent(rawEligibility, true);\n      const bulletTerms = formatContent(termsSection, false);\n      \n      if (bulletEligibility === \"N/A\" || bulletEligibility.length < 50) {\n        console.log(`  ⚠️  Skipping ${jobTitle}: Insufficient eligibility data`);\n        continue;\n      }\n      \n      console.log(`  ✅ Adding: ${jobTitle}`);\n      \n      results.push({\n        json: {\n          isValid: true,\n          title: jobTitle,\n          slug: `${jobTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${externalId}`,\n          external_id: externalId,\n          documentName: jobTitle,\n          content: `Northwest General Hospital requires the services of: ${jobTitle}`,\n          status: \"publish\",\n          \"application-email\": \"recruitment.hr@nwgh.pk\",\n          \"date-close\": closingTimestamp,\n          location: \"Northwest General Hospital & Research Centre, Peshawar\",\n          \"type-full-time-part-time-contract\": \"Full Time\",\n          \"job-qualification\": `<strong>Eligibility:</strong><br>${bulletEligibility}<br><br><strong style=\"text-decoration: underline;\">TERMS & CONDITIONS:</strong><br>${bulletTerms}`,\n          eligibility: bulletEligibility,\n          sender: sender,\n          originalFileName: fileName\n        }\n      });\n    }\n  }\n}\n\nconsole.log(`\\n✨ Total: ${results.length} jobs created`);\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        -96
+      ],
+      "id": "05a1b36e-310e-4804-b746-92a20ae4730d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "postProcessAction": "nothing",
+        "format": "resolved",
+        "dataPropertyAttachmentsPrefixName": "attachment",
+        "options": {
+          "trackLastMessageId": false
+        }
+      },
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2.1,
+      "position": [
+        16,
+        -96
+      ],
+      "id": "948e5329-96f4-41ea-804a-d7ee301863c8",
+      "name": "Email Trigger (IMAP)",
+      "credentials": {
+        "imap": {
+          "id": "st2Vtnd1CxpTzKyq",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "hammad.ahmed@blimp.pk",
+        "toEmail": "=hammad.ahmed@blimp.pk",
+        "subject": "Job Post Error: Missing Information.",
+        "html": "=<p>Assalam-o-Alaikum,</p>\n<p>Your job post <strong>{{ $json.documentName }}</strong> could not be published because some required information is missing:</p>\n{{ $json.missingFieldsHtml }}\n<p>Kindly review the details, correct the missing information, and resend the email.</p>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1920,
+        224
+      ],
+      "id": "d419c419-3b85-4333-9dc6-533670144e4c",
+      "name": "Send notication when false1",
+      "webhookId": "0db6cac6-2be0-4656-baee-9c837f239939",
+      "credentials": {
+        "smtp": {
+          "id": "MPjPUBQs1HvLxD6G",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.nwgh.pk/wp-json/wp/v2/jobs",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"title\": {{ JSON.stringify($json.title || \"Secretary Coordination\") }},\n  \"content\": {{ JSON.stringify($json.content || \"Northwest General Hospital & Research Centre, Peshawar & Northwest General Hospital II, Peshawar, the leading Healthcare institutions in the region require the services of:\") }},\n  \"status\": {{ JSON.stringify($json.status || \"publish\") }},\n  \"meta\": {\n    \"application-email\": {{ JSON.stringify($json[\"application-email\"] || \"recruitment.hr@nwgh.pk\") }},\n    \"date-close\": {{ $json[\"date-close\"] || 1765393199 }},\n    \"location\": {{ JSON.stringify($json.location || \"Northwest General Hospital & Research Centre, Peshawar\") }},\n    \"type-full-time-part-time-contract\": {{ JSON.stringify($json[\"type-full-time-part-time-contract\"] || \"Full Time\") }},\n    \"job-qualification\": {{ JSON.stringify($json[\"job-qualification\"] || \"N/A\") }},\n    \"eligibility\": {{ JSON.stringify($json.eligibility || \"Refer to Terms & Conditions\") }},\n    \"terms\": {{ JSON.stringify($json.terms || \"N/A\") }}\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2416,
+        -96
+      ],
+      "id": "2be20dc5-a3ed-4b27-acdc-58d3e9962896",
+      "name": "Wordpress upload",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TkchrBSMd747G4XZ",
+          "name": "Header Auth account"
+        },
+        "httpBasicAuth": {
+          "id": "CkWy750Sd0HD57gv",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloudmersive.com/convert/docx/to/html",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "attachment",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        672,
+        -96
+      ],
+      "id": "f3b065bf-9e32-4c14-aba0-2af7a0f2728a",
+      "name": "APICLOUDMERSIVE",
+      "alwaysOutputData": false,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TkchrBSMd747G4XZ",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().flatMap(item => {\n  if (!item.binary) return [];\n\n  return Object.keys(item.binary)\n    .filter(key => key.startsWith(\"attachment\"))\n    .map(key => ({\n      json: {\n        ...item.json,\n        originalFileName: item.binary[key].fileName \n      },\n      binary: {\n        // Yeh line important hai: binary field ka naam 'attachment' rakhna hai\n        attachment: item.binary[key]\n      }\n    }));\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        -96
+      ],
+      "id": "227cff85-fcc4-4ead-addf-cac2d60d0912",
+      "name": "attachment reader"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "destinationKey": "html_body",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        928,
+        -96
+      ],
+      "id": "a22a5157-713a-49a9-b88d-1e0ba36faa8f",
+      "name": "Extract from File"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Wordpress upload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send notication when false1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email successfully": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "attachment reader",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wordpress upload": {
+      "main": [
+        [
+          {
+            "node": "Send email successfully",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "APICLOUDMERSIVE": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "attachment reader": {
+      "main": [
+        [
+          {
+            "node": "APICLOUDMERSIVE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "3135d14c-d704-44a3-87ca-9f70b841373a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f1559eaa2403ae0402e5d29db5d6876f8f7c41001326479197fe40159c5a11c"
+  },
+  "id": "WFEeHB9hq4yBV2pL",
+  "tags": []
+}
