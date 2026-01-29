@@ -1,116 +1,156 @@
+📌 Project Overview
 
-# Automated Job Post Processor & Publisher Using n8n
+Organizations often receive job postings via email in DOCX or text format. Manually extracting details and publishing them to a website is time-consuming and error-prone.
 
-## Overview
-This project is an **automated workflow** built with **n8n** that streamlines job posting from emails. It reads incoming emails containing job descriptions (DOCX or text), extracts relevant fields, formats the data, and publishes jobs directly to a **WordPress website**. Notifications are sent to confirm successful or failed job posting.  
+This project solves that problem by:
 
-This workflow saves hours of manual processing, ensures consistent formatting, and makes job posting faster and more reliable.
+Automatically reading job emails
 
----
+Extracting and validating job information
 
-## Features
-- **Email Trigger**: Automatically monitors an email inbox (IMAP) for new job submissions.  
-- **DOCX Conversion**: Converts attached DOCX job descriptions to plain text using Cloudmersive API.  
-- **Data Extraction & Cleaning**: Extracts fields like `Job Title`, `Eligibility`, `Closing Date`, `Location`, and `Job Type`. Cleans and formats job content.  
-- **Slug Generation**: Automatically generates URL-friendly slugs for WordPress posts.  
-- **Conditional Processing**:  
-  - Publishes jobs to WordPress if all required fields are valid.  
-  - Sends error notifications if required fields are missing.  
-- **Email Notifications**: Sends confirmation emails for successful posts and alerts for failed posts.  
-- **WordPress Integration**: Publishes structured job posts with all meta fields using REST API.  
+Publishing structured job posts to WordPress
 
----
+Notifying stakeholders of success or failure
 
-## Workflow Steps
+✨ Key Features
 
-1. **Email Trigger (IMAP)**  
-   - Watches an inbox for incoming emails with job submissions.  
-   - Supports attachments in DOCX format.  
+📥 Email Trigger (IMAP)
+Automatically listens for new job submission emails.
 
-2. **Attachment Extraction**  
-   - Extracts DOCX attachments from emails for processing.  
+📄 DOCX Processing
+Extracts job descriptions from .docx attachments using Cloudmersive API.
 
-3. **DOCX to Text Conversion**  
-   - Converts DOCX files to plain text using Cloudmersive API.  
+🧠 Smart Data Extraction & Cleaning
 
-4. **Field Editing & Cleanup**  
-   - Cleans text, extracts job fields (title, eligibility, location, closing date, type, etc.).  
-   - Generates slugs and formats job descriptions into HTML for WordPress.  
+Job Title
 
-5. **Validation**  
-   - Checks if required fields are present.  
-   - If valid → proceed to WordPress upload.  
-   - If invalid → send error notification email.  
+Eligibility / Qualifications
 
-6. **WordPress Upload**  
-   - Publishes job post using the WordPress REST API.  
-   - Includes meta fields for email, closing date, eligibility, location, and job type.  
+Closing Date (auto-detected or defaulted)
 
-7. **Email Notifications**  
-   - Sends success or failure notifications to the sender.  
+Job Type & Location
 
----
+Slug generation for SEO-friendly URLs
 
-## Tech Stack
+✅ Validation Logic
 
-| Component              | Purpose                                           |
-|------------------------|-------------------------------------------------|
-| **n8n**                | Workflow automation platform                     |
-| **Cloudmersive API**   | Converts DOCX to plain text                       |
-| **IMAP**               | Email monitoring for incoming job submissions    |
-| **WordPress REST API** | Publish jobs to a WordPress website             |
-| **SMTP / Gmail API**   | Send notification emails                          |
-| **JavaScript**         | Data extraction, cleaning, formatting, validation |
+Publishes only valid job posts
 
----
+Sends error notifications if required data is missing
 
-## Setup & Configuration
+🌐 WordPress Integration
+Publishes jobs using WordPress REST API with complete meta fields.
 
-1. **n8n Installation**  
-   - Follow [n8n installation guide](https://docs.n8n.io/getting-started/installation/) for your system.  
+📧 Automated Notifications
+Sends confirmation emails for:
 
-2. **Import Workflow**  
-   - Import the `workflow.json` file into your n8n instance.  
+Successful job posting
 
-3. **Credentials Setup**  
-   - **IMAP account** for email trigger.  
-   - **Cloudmersive API key** for DOCX conversion.  
-   - **SMTP account** for sending notifications.  
-   - **WordPress HTTP Basic Auth or API Key** for publishing posts.  
+Failed or incomplete submissions
 
-4. **Adjust Workflow**  
-   - Update the email addresses, WordPress URL, and default meta fields as needed.  
+🛠 Workflow Architecture
+Email (IMAP)
+   ↓
+Attachment Reader (DOCX)
+   ↓
+DOCX → HTML/Text (Cloudmersive)
+   ↓
+Data Cleaning & Formatting (JavaScript)
+   ↓
+Validation (IF Node)
+   ├── Valid → WordPress Publish → Success Email
+   └── Invalid → Error Notification Email
 
-5. **Test Workflow**  
-   - Send a test email with a sample job description (DOCX or text) and verify post creation and email notifications.  
+🧰 Tech Stack
+Technology	Purpose
+n8n	Workflow automation
+IMAP	Email monitoring
+Cloudmersive API	DOCX → HTML/Text conversion
+JavaScript	Parsing, validation, formatting
+WordPress REST API	Job post publishing
+SMTP	Email notifications
+⚙️ Setup & Installation
+1️⃣ Install n8n
 
----
+Follow the official guide:
+👉 https://docs.n8n.io/getting-started/installation/
 
-## Future Enhancements
-- Auto-post notifications to **LinkedIn or Slack** for new job listings.  
-- Support for **multi-language job descriptions**.  
-- Add **job category detection** and automatic tagging in WordPress.  
-- Integrate **error logging dashboard** for workflow monitoring.  
+2️⃣ Import Workflow
 
----
+Download the workflow JSON file
 
-## Contributing
-Contributions are welcome!  
-1. Fork the repository  
-2. Create a feature branch (`git checkout -b feature-name`)  
-3. Commit your changes (`git commit -am 'Add feature'`)  
-4. Push to the branch (`git push origin feature-name`)  
-5. Create a Pull Request  
+In n8n → Import Workflow → From File
 
----
+3️⃣ Configure Credentials
 
-## License
-This project is licensed under the MIT License.  
+You’ll need to set up:
 
----
+IMAP Credentials (Email trigger)
 
-## Contact
-For questions or support: **ihsanmehmood384@gmail.com**  
+Cloudmersive API Key (DOCX conversion)
 
----
+SMTP Credentials (Email notifications)
 
+WordPress HTTP Basic Auth / API Credentials
+
+4️⃣ Customize
+
+Update:
+
+WordPress endpoint URL
+
+Default job location / job type
+
+Notification email addresses
+
+5️⃣ Test
+
+Send a test email with a DOCX job description and verify:
+
+Job creation in WordPress
+
+Success / error notification emails
+
+📈 Future Enhancements
+
+🔔 Auto-post jobs to LinkedIn / Slack
+
+🌍 Multi-language job posting support
+
+🏷 Auto-tagging & categorization in WordPress
+
+📊 Error logging & monitoring dashboard
+
+🤝 Contributing
+
+Contributions are welcome!
+
+Fork the repository
+
+Create a feature branch
+
+git checkout -b feature-name
+
+
+Commit changes
+
+git commit -m "Add new feature"
+
+
+Push to branch
+
+git push origin feature-name
+
+
+Open a Pull Request
+
+📄 License
+
+This project is licensed under the MIT License.
+
+📬 Contact
+
+For questions or collaboration:
+
+Ihsan Mehmood
+📧 ihsanmehmood384@gmail.com
